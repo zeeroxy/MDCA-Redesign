@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MDCA — Mobile Dental Clinics Australia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* ── BRAND COLORS — extracted from official MDCA logo ── */
+  :root {
+    --blue-deep:   #1A3A6B;   /* darkest navy layer in tooth */
+    --blue-mid:    #1E5799;   /* medium brand blue */
+    --blue-bright: #2B8FD0;   /* lighter bright blue */
+    --blue-sky:    #7EC8E3;   /* lightest sky layer in tooth */
+    --dark-bg:     #0C1E3A;   /* page background */
+    --dark-mid:    #112347;   /* section/card dark bg */
+    --dark-card:   #162855;   /* card surface */
+    --off-white:   #F0F7FD;   /* primary text */
+    --text-light:  #B0CCDF;   /* secondary text */
+    --text-muted:  #6A8FAD;   /* muted/hint text */
+    --gold:        #F0B429;   /* award accent only */
+  }
+
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--dark-bg);color:var(--off-white);overflow-x:hidden}
+
+  /* ── CURSOR ── */
+  .c-dot{width:7px;height:7px;background:var(--blue-bright);border-radius:50%;position:fixed;pointer-events:none;z-index:9999;transform:translate(-50%,-50%)}
+  .c-ring{width:34px;height:34px;border:1.5px solid rgba(43,143,208,.5);border-radius:50%;position:fixed;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:width .3s,height .3s,border-color .3s}
+  body:has(a:hover) .c-ring,body:has(button:hover) .c-ring{width:54px;height:54px;border-color:var(--blue-bright)}
+
+  /* ── PROGRESS BAR ── */
+  .pbar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--blue-mid),var(--blue-sky));z-index:200;width:0%;box-shadow:0 0 10px rgba(43,143,208,.6)}
+
+  /* ── NAV ── */
+  nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:1.3rem 5%;display:flex;align-items:center;justify-content:space-between;transition:background .4s,padding .4s,border-color .4s}
+  nav.scrolled{background:rgba(12,30,58,.96);backdrop-filter:blur(24px);padding:.9rem 5%;border-bottom:1px solid rgba(43,143,208,.2)}
+  .nav-logo{display:flex;align-items:center;text-decoration:none}
+  .logo-svg{height:50px;width:auto}
+  .nav-links{display:flex;align-items:center;gap:2.2rem;list-style:none}
+  .nav-links a{color:var(--text-light);text-decoration:none;font-size:.82rem;font-weight:500;letter-spacing:.07em;text-transform:uppercase;transition:color .3s;position:relative}
+  .nav-links a::after{content:'';position:absolute;bottom:-4px;left:0;right:0;height:1.5px;background:var(--blue-bright);transform:scaleX(0);transform-origin:left;transition:transform .3s}
+  .nav-links a:hover{color:#fff}
+  .nav-links a:hover::after{transform:scaleX(1)}
+  .nav-cta{background:var(--blue-mid)!important;color:#fff!important;padding:.55rem 1.5rem!important;border-radius:100px;font-weight:600!important;box-shadow:0 4px 20px rgba(30,87,153,.45);transition:background .3s,transform .2s!important}
+  .nav-cta:hover{background:var(--blue-bright)!important;transform:translateY(-1px)!important}
+  .nav-cta::after{display:none!important}
+
+  /* ── HERO ── */
+  #hero{min-height:100vh;display:grid;grid-template-columns:55% 45%;align-items:center;padding:0 5%;position:relative;overflow:hidden}
+  .hero-bg{position:absolute;inset:0;z-index:0;background:radial-gradient(ellipse 70% 80% at 80% 40%,rgba(30,87,153,.25) 0%,transparent 65%),radial-gradient(ellipse 50% 60% at 5% 90%,rgba(43,143,208,.1) 0%,transparent 55%),var(--dark-bg)}
+  .hero-grid{position:absolute;inset:0;z-index:0;background-image:linear-gradient(rgba(43,143,208,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(43,143,208,.04) 1px,transparent 1px);background-size:55px 55px}
+  .hero-content{position:relative;z-index:2;padding-top:7rem;padding-bottom:3rem}
+  .hero-badge{display:inline-flex;align-items:center;gap:.5rem;background:rgba(43,143,208,.12);border:1px solid rgba(43,143,208,.35);padding:.38rem 1rem;border-radius:100px;font-size:.72rem;font-weight:600;color:var(--blue-sky);letter-spacing:.12em;text-transform:uppercase;margin-bottom:2rem;animation:fadeUp .7s .2s both}
+  .hb-dot{width:6px;height:6px;background:var(--blue-sky);border-radius:50%;animation:pulse 2s infinite;flex-shrink:0}
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(1.6)}}
+  .hero-title{font-family:'Playfair Display',serif;font-size:clamp(2.8rem,4.5vw,5.2rem);font-weight:700;line-height:1.06;letter-spacing:-.02em;color:#fff;margin-bottom:.6rem;animation:fadeUp .7s .4s both}
+  .hero-title em{font-style:italic;font-weight:400;background:linear-gradient(135deg,var(--blue-bright),var(--blue-sky));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;display:block}
+  .hero-sub{font-size:1rem;color:var(--text-light);line-height:1.85;max-width:500px;animation:fadeUp .7s .6s both;margin-bottom:2.5rem}
+  .hero-actions{display:flex;gap:1rem;align-items:center;flex-wrap:wrap;animation:fadeUp .7s .8s both;margin-bottom:3rem}
+  .btn-primary{background:linear-gradient(135deg,var(--blue-mid),var(--blue-bright));color:#fff;padding:.9rem 2.2rem;border-radius:100px;text-decoration:none;font-size:.9rem;font-weight:600;letter-spacing:.03em;border:none;cursor:pointer;transition:transform .3s,box-shadow .3s;box-shadow:0 5px 28px rgba(30,87,153,.5);display:inline-flex;align-items:center;gap:.5rem}
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 10px 40px rgba(43,143,208,.55)}
+  .btn-ghost{color:var(--off-white);text-decoration:none;font-size:.9rem;font-weight:500;display:inline-flex;align-items:center;gap:.5rem;padding:.9rem 2rem;border:1px solid rgba(126,200,227,.25);border-radius:100px;transition:border-color .3s,color .3s,gap .3s;background:none;cursor:pointer}
+  .btn-ghost:hover{border-color:var(--blue-sky);color:#fff;gap:.8rem}
+  .hero-phone{display:flex;align-items:center;gap:.8rem;animation:fadeUp .7s 1s both}
+  .hero-phone-icon{width:46px;height:46px;background:rgba(43,143,208,.15);border:1px solid rgba(43,143,208,.3);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
+  .hero-phone a{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:600;color:#fff;text-decoration:none;transition:color .3s}
+  .hero-phone a:hover{color:var(--blue-sky)}
+  .hero-phone span{font-size:.75rem;color:var(--text-muted);display:block}
+  .hero-visual{position:relative;z-index:2;padding-top:7rem;padding-bottom:3rem;display:flex;justify-content:flex-end;align-items:center}
+  .hv-wrap{position:relative;width:100%;max-width:440px}
+  .hv-card{background:linear-gradient(145deg,rgba(22,40,85,.9),rgba(17,35,71,.95));border:1px solid rgba(43,143,208,.22);border-radius:24px;padding:2.2rem;position:relative;overflow:hidden;animation:fadeUp .7s .5s both;box-shadow:0 20px 60px rgba(0,0,0,.4)}
+  .hv-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--blue-bright),transparent)}
+  .hv-label{font-size:.7rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--blue-sky);margin-bottom:1.4rem;display:flex;align-items:center;gap:.5rem}
+  .hv-label::before{content:'';width:18px;height:1px;background:var(--blue-sky)}
+  .chips{display:grid;grid-template-columns:1fr 1fr;gap:.65rem;margin-bottom:1.8rem}
+  .chip{background:rgba(43,143,208,.1);border:1px solid rgba(43,143,208,.2);border-radius:12px;padding:.8rem .9rem;font-size:.82rem;font-weight:500;color:var(--off-white);display:flex;align-items:center;gap:.45rem;transition:background .3s,border-color .3s}
+  .chip:hover{background:rgba(43,143,208,.2);border-color:rgba(43,143,208,.4)}
+  .hv-stats{display:flex;border-top:1px solid rgba(255,255,255,.07);padding-top:1.4rem}
+  .hv-stat{flex:1;text-align:center}
+  .hv-stat+.hv-stat{border-left:1px solid rgba(255,255,255,.07)}
+  .hv-num{font-family:'Playfair Display',serif;font-size:1.9rem;font-weight:700;color:var(--blue-sky);display:block;line-height:1}
+  .hv-lbl{font-size:.68rem;color:var(--text-muted);margin-top:.35rem}
+  .fb{position:absolute;background:rgba(12,30,58,.97);border:1px solid rgba(43,143,208,.25);border-radius:14px;padding:.8rem 1.1rem}
+  .fb-award{top:-18px;right:-18px;display:flex;align-items:center;gap:.6rem;animation:floatAnim 4s ease-in-out infinite}
+  .fb-ins{bottom:-18px;left:-18px;animation:floatAnim 4s ease-in-out infinite 1.8s}
+  @keyframes floatAnim{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+  .fb-awd-icon{font-size:1.6rem}
+  .fb-awd-title{font-size:.8rem;font-weight:600;color:var(--gold)}
+  .fb-awd-sub{font-size:.67rem;color:var(--text-muted)}
+  .fb-ins-title{font-size:.78rem;font-weight:600;color:var(--blue-sky)}
+  .fb-ins-sub{font-size:.67rem;color:var(--text-muted);margin-top:.15rem}
+
+  /* ── SHARED ── */
+  section{padding:6.5rem 5%}
+  .sec-label{font-size:.7rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--blue-bright);margin-bottom:1rem;display:flex;align-items:center;gap:.7rem}
+  .sec-label::before{content:'';width:22px;height:2px;background:var(--blue-bright);border-radius:2px}
+  .sec-title{font-family:'Playfair Display',serif;font-size:clamp(2.2rem,3.5vw,3.6rem);font-weight:700;line-height:1.12;letter-spacing:-.01em;color:#fff;max-width:680px}
+  .sec-title em{font-style:italic;font-weight:400;color:var(--blue-sky)}
+
+  /* ── PARTNERS ── */
+  #partners{padding:2.5rem 0;border-top:1px solid rgba(255,255,255,.05);border-bottom:1px solid rgba(255,255,255,.05);background:rgba(17,35,71,.5);overflow:hidden}
+  .p-label{text-align:center;font-size:.7rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--text-muted);margin-bottom:1.8rem}
+  .mq-wrap{overflow:hidden;mask:linear-gradient(90deg,transparent,black 8%,black 92%,transparent)}
+  .mq-track{display:flex;gap:5rem;align-items:center;animation:mq 22s linear infinite;width:max-content}
+  .mq-item{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:400;color:rgba(126,200,227,.3);white-space:nowrap;letter-spacing:.04em;transition:color .3s;cursor:default}
+  .mq-item:hover{color:rgba(126,200,227,.7)}
+  @keyframes mq{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+  /* ── SERVICES ── */
+  #services{background:var(--dark-mid);position:relative;overflow:hidden}
+  #services::before{content:'';position:absolute;top:-200px;right:-200px;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(30,87,153,.12),transparent 70%);pointer-events:none}
+  .svc-header{display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:end;margin-bottom:3.5rem}
+  .svc-desc{color:var(--text-light);font-size:1rem;line-height:1.85}
+  .svc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem}
+  .svc-card{background:rgba(22,40,85,.6);border:1px solid rgba(43,143,208,.12);border-radius:20px;padding:2rem 1.8rem;position:relative;overflow:hidden;transition:transform .35s,border-color .35s,box-shadow .35s;cursor:pointer}
+  .svc-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--blue-mid),var(--blue-sky));transform:scaleX(0);transform-origin:left;transition:transform .4s}
+  .svc-card:hover{transform:translateY(-7px);border-color:rgba(43,143,208,.35);box-shadow:0 20px 50px rgba(0,0,0,.3)}
+  .svc-card:hover::after{transform:scaleX(1)}
+  .svc-card.hl{background:linear-gradient(135deg,rgba(30,87,153,.35),rgba(22,40,85,.6));border-color:rgba(43,143,208,.3)}
+  .svc-card.wide{grid-column:span 2;display:grid;grid-template-columns:1fr 1fr;gap:2rem;align-items:center}
+  .svc-icon{width:52px;height:52px;background:rgba(43,143,208,.12);border:1px solid rgba(43,143,208,.25);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;margin-bottom:1.4rem;transition:background .3s,transform .3s}
+  .svc-card:hover .svc-icon{background:rgba(43,143,208,.22);transform:scale(1.08)}
+  .svc-name{font-family:'Playfair Display',serif;font-size:1.35rem;font-weight:600;color:#fff;margin-bottom:.7rem}
+  .svc-desc-txt{font-size:.87rem;color:var(--text-light);line-height:1.75;margin-bottom:1.4rem}
+  .svc-link{color:var(--blue-sky);font-size:.78rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;text-decoration:none;display:inline-flex;align-items:center;gap:.4rem;transition:gap .3s}
+  .svc-link:hover{gap:.7rem}
+  .fund-box{background:rgba(43,143,208,.08);border:1px solid rgba(43,143,208,.2);border-radius:14px;padding:1.5rem}
+  .fund-label{font-size:.7rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--blue-sky);margin-bottom:.8rem}
+  .fund-list{font-size:.88rem;color:var(--text-light);line-height:2.1}
+  .fund-list span{color:var(--blue-sky);margin-right:.4rem}
+
+  /* ── HOW IT WORKS ── */
+  #how{background:var(--dark-bg);position:relative;overflow:hidden}
+  #how::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 55% 55% at 50% 50%,rgba(30,87,153,.08),transparent 70%);pointer-events:none}
+  .how-hdr{text-align:center;margin-bottom:5rem;position:relative}
+  .how-hdr .sec-label{justify-content:center}
+  .how-hdr .sec-title{margin:0 auto;text-align:center}
+  .how-hdr p{color:var(--text-light);max-width:500px;margin:1.2rem auto 0;line-height:1.8}
+  .how-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:0;position:relative}
+  .how-line{position:absolute;top:34px;left:calc(12.5% + 34px);right:calc(12.5% + 34px);height:1px;background:linear-gradient(90deg,var(--blue-mid),rgba(126,200,227,.5),var(--blue-mid))}
+  .how-step{text-align:center;padding:0 1.5rem;position:relative}
+  .how-num{width:68px;height:68px;background:var(--dark-mid);border:1.5px solid rgba(43,143,208,.4);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:700;color:var(--blue-bright);margin:0 auto 2rem;transition:background .3s,transform .3s,border-color .3s;position:relative;z-index:1}
+  .how-step:hover .how-num{background:var(--blue-mid);color:#fff;transform:scale(1.08);border-color:var(--blue-bright)}
+  .how-step-title{font-family:'Playfair Display',serif;font-size:1.15rem;font-weight:600;color:#fff;margin-bottom:.8rem}
+  .how-step-desc{font-size:.84rem;color:var(--text-light);line-height:1.75}
+
+  /* ── STATS ── */
+  #stats{padding:4.5rem 5%;background:linear-gradient(135deg,rgba(30,87,153,.2),rgba(12,30,58,.5));border-top:1px solid rgba(43,143,208,.2);border-bottom:1px solid rgba(43,143,208,.2)}
+  .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;text-align:center}
+  .stat-num{font-family:'Playfair Display',serif;font-size:3.8rem;font-weight:700;color:var(--blue-sky);line-height:1;display:block;text-shadow:0 0 40px rgba(126,200,227,.3)}
+  .stat-lbl{font-size:.83rem;color:var(--text-light);margin-top:.5rem;line-height:1.5}
+
+  /* ── AWARD ── */
+  #award{padding:3.5rem 5%;background:var(--dark-mid)}
+  .award-card{max-width:900px;margin:0 auto;background:linear-gradient(135deg,rgba(240,180,41,.07),rgba(240,180,41,.02));border:1px solid rgba(240,180,41,.25);border-radius:24px;padding:2.8rem 3rem;display:grid;grid-template-columns:90px 1fr;gap:2.5rem;align-items:center}
+  .award-icon{width:90px;height:90px;background:linear-gradient(135deg,rgba(240,180,41,.2),rgba(240,180,41,.08));border:1px solid rgba(240,180,41,.3);border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:2.4rem;flex-shrink:0}
+  .award-title{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:600;color:var(--gold);margin-bottom:.5rem}
+  .award-desc{color:var(--text-light);font-size:.93rem;line-height:1.75}
+
+  /* ── ABOUT ── */
+  #about{background:var(--dark-mid);position:relative;overflow:hidden}
+  .about-wrap{display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:center}
+  .about-visual{position:relative}
+  .about-img{background:linear-gradient(135deg,rgba(30,87,153,.2),rgba(43,143,208,.08));border:1px solid rgba(43,143,208,.2);border-radius:20px;aspect-ratio:4/3;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;overflow:hidden;position:relative}
+  .about-img-txt{font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--blue-sky);opacity:.7;font-style:italic}
+  .about-year{position:absolute;bottom:-20px;right:-20px;background:linear-gradient(135deg,var(--blue-mid),var(--blue-bright));border-radius:16px;padding:1.3rem 1.8rem;text-align:center;box-shadow:0 10px 30px rgba(30,87,153,.5)}
+  .about-year-num{font-family:'Playfair Display',serif;font-size:2.2rem;font-weight:700;color:#fff;display:block;line-height:1}
+  .about-year-lbl{font-size:.72rem;color:rgba(255,255,255,.75);margin-top:.25rem}
+  .about-text p{color:var(--text-light);line-height:1.9;margin-bottom:1.4rem;font-size:.97rem}
+  .mission-q{border-left:3px solid var(--blue-bright);padding:1.2rem 1.5rem;margin:2rem 0;background:rgba(43,143,208,.05);border-radius:0 12px 12px 0}
+  .mission-q blockquote{font-family:'Playfair Display',serif;font-size:1.15rem;font-style:italic;color:#fff;line-height:1.6}
+  .mission-q cite{font-size:.77rem;color:var(--blue-sky);font-style:normal;display:block;margin-top:.6rem}
+  .team-hdr{margin-top:5rem;margin-bottom:2.5rem}
+  .team-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.2rem}
+  .team-card{background:rgba(22,40,85,.5);border:1px solid rgba(43,143,208,.1);border-radius:16px;padding:1.6rem 1.2rem;text-align:center;transition:transform .3s,border-color .3s,box-shadow .3s}
+  .team-card:hover{transform:translateY(-5px);border-color:rgba(43,143,208,.3);box-shadow:0 12px 35px rgba(0,0,0,.25)}
+  .team-avatar{width:56px;height:56px;background:linear-gradient(135deg,rgba(30,87,153,.4),rgba(43,143,208,.15));border:1px solid rgba(43,143,208,.3);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.4rem;margin:0 auto 1rem}
+  .team-name{font-size:.88rem;font-weight:600;color:#fff;margin-bottom:.3rem}
+  .team-role{font-size:.74rem;color:var(--text-muted);line-height:1.4}
+
+  /* ── CTA ── */
+  #cta{padding:8rem 5%;text-align:center;position:relative;overflow:hidden}
+  #cta::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 65% 75% at 50% 50%,rgba(30,87,153,.15),transparent 65%)}
+  .cta-inner{position:relative;z-index:1}
+  .cta-inner .sec-label{justify-content:center}
+  .cta-inner .sec-title{text-align:center;margin:0 auto 1.5rem}
+  .cta-inner p{color:var(--text-light);max-width:520px;margin:0 auto 2.8rem;line-height:1.8}
+  .cta-btns{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
+  .cta-phone{display:block;margin:2.5rem auto 0;font-family:'Playfair Display',serif;font-size:2.8rem;font-weight:700;color:#fff;text-decoration:none;letter-spacing:-.02em;transition:color .3s}
+  .cta-phone:hover{color:var(--blue-sky)}
+  .cta-addr{font-size:.82rem;color:var(--text-muted);margin-top:.5rem}
+
+  /* ── FOOTER ── */
+  footer{background:rgba(0,0,0,.35);border-top:1px solid rgba(43,143,208,.12);padding:4rem 5% 2rem}
+  .ft-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1.5fr;gap:3rem;margin-bottom:3rem}
+  .ft-desc{font-size:.85rem;color:var(--text-muted);line-height:1.75;max-width:280px;margin-top:.75rem}
+  .ft-col-title{font-size:.7rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--blue-bright);margin-bottom:1.3rem}
+  .ft-links{list-style:none}
+  .ft-links li{margin-bottom:.65rem}
+  .ft-links a{color:var(--text-muted);text-decoration:none;font-size:.87rem;transition:color .3s}
+  .ft-links a:hover{color:var(--off-white)}
+  .ft-contact{display:flex;gap:.6rem;align-items:flex-start;color:var(--text-muted);font-size:.87rem;margin-bottom:.75rem}
+  .ft-contact a{color:var(--off-white);text-decoration:none;transition:color .3s}
+  .ft-contact a:hover{color:var(--blue-sky)}
+  .ft-bottom{border-top:1px solid rgba(255,255,255,.05);padding-top:1.5rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem}
+  .ft-copy{font-size:.78rem;color:var(--text-muted)}
+  .ft-legal{display:flex;gap:1.5rem;flex-wrap:wrap}
+  .ft-legal a{font-size:.76rem;color:var(--text-muted);text-decoration:none;transition:color .3s}
+  .ft-legal a:hover{color:var(--off-white)}
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp{from{opacity:0;transform:translateY(32px)}to{opacity:1;transform:translateY(0)}}
+  .reveal{opacity:0;transform:translateY(36px);transition:opacity .75s ease,transform .75s ease}
+  .reveal.visible{opacity:1;transform:translateY(0)}
+
+  /* ── RESPONSIVE ── */
+  @media(max-width:1024px){
+    #hero{grid-template-columns:1fr;min-height:auto;padding:8rem 5% 4rem}
+    .hero-visual{display:none}
+    .svc-header{grid-template-columns:1fr;gap:1.5rem}
+    .svc-grid{grid-template-columns:1fr 1fr}
+    .svc-card.wide{grid-column:span 2;grid-template-columns:1fr}
+    .how-steps{grid-template-columns:1fr 1fr;gap:3rem}
+    .how-line{display:none}
+    .about-wrap{grid-template-columns:1fr}
+    .stats-row{grid-template-columns:1fr 1fr;gap:2rem}
+    .team-grid{grid-template-columns:1fr 1fr}
+    .ft-grid{grid-template-columns:1fr 1fr}
+    .award-card{grid-template-columns:1fr;text-align:center}
+  }
+  @media(max-width:640px){
+    .svc-grid{grid-template-columns:1fr}
+    .svc-card.wide{grid-column:span 1;grid-template-columns:1fr}
+    .how-steps{grid-template-columns:1fr}
+    .nav-links{display:none}
+    .ft-grid{grid-template-columns:1fr}
+    .stats-row{grid-template-columns:1fr 1fr}
+  }
+</style>
+</head>
+<body>
+
+<div class="c-dot" id="dot"></div>
+<div class="c-ring" id="ring"></div>
+<div class="pbar" id="pbar"></div>
+
+
+<!-- NAV -->
+<nav id="nav">
+  <a href="#" class="nav-logo">
+    <svg class="logo-svg" viewBox="0 0 270 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Tooth icon — 4 layered paths matching real logo -->
+      <path d="M10 22C10 12 16.5 6 25 6C29.5 6 33 8 36 10.5C37.8 12 39.2 13 40 13C40.8 13 42.2 12 44 10.5C47 8 50.5 6 55 6C63.5 6 70 12 70 22C70 31 66 41 62 52C58.5 61 56.5 72 54.5 82C53.5 87 50.5 89.5 47.5 87C45.5 85 44.5 79 43.5 72C42.5 65 41.5 60 40 60C38.5 60 37.5 65 36.5 72C35.5 79 34.5 85 32.5 87C29.5 89.5 26.5 87 25.5 82C23.5 72 21.5 61 18 52C14 41 10 31 10 22Z" fill="#1A3A6B"/>
+      <path d="M16 22C16 14 21 9 28 9C32.5 9 36 11.5 38.5 13.5C39.3 14.2 39.7 14.7 40 14.7C40.3 14.7 40.7 14.2 41.5 13.5C44 11.5 47.5 9 52 9C59 9 64 14 64 22C64 30 60.5 40 57 50.5C54 59.5 52 70 50 80C49.5 83 48 84 46 83C44.5 82 44 77 43 71C42 64 41 59 40 59C39 59 38 64 37 71C36 77 35.5 82 34 83C32 84 30.5 83 30 80C28 70 26 59.5 23 50.5C19.5 40 16 30 16 22Z" fill="#1E5799"/>
+      <path d="M22 22C22 15 26.5 11 33 11C36.5 11 39.5 13 41.5 15C39.5 13 36.5 11 33 11L22 22ZM22 22C22 15 26.5 11 33 11C36.5 11 39.5 13 41 14.5C39.5 15.5 40 16 40 16C40 16 40.5 15.5 39 14.5C40.5 13 43.5 11 47 11C53.5 11 58 15 58 22C58 29 55 38 51.5 48C49 57 47.5 67 45.5 77C45 80 44 81.5 43 81C42 80.5 41.5 76 41 70C40 62.5 39.5 58 40 58C40.5 58 40 62.5 39 70C38.5 76 38 80.5 37 81C36 81.5 35 80 34.5 77C32.5 67 31 57 28.5 48C25 38 22 29 22 22Z" fill="#2B8FD0"/>
+      <path d="M29 19C29 14.5 31.5 12 35.5 12.5C37 12.8 38.5 14 40 15.5C41.5 14 43 12.8 44.5 12.5C48.5 12 51 14.5 51 19C51 25.5 48.5 33 46.5 41C44.5 49 43.5 58.5 42 67.5C41.7 69.5 41 70.5 40 70.5C39 70.5 38.3 69.5 38 67.5C36.5 58.5 35.5 49 33.5 41C31.5 33 29 25.5 29 19Z" fill="#7EC8E3" opacity="0.8"/>
+      <!-- MDCA text -->
+      <text x="84" y="43" font-family="'Arial Black',Arial,sans-serif" font-weight="900" font-size="30" fill="#1A3A6B" letter-spacing="1.5">MDCA</text>
+      <!-- Rule -->
+      <line x1="84" y1="50" x2="206" y2="50" stroke="#2B8FD0" stroke-width="1.2"/>
+      <!-- Subtitle -->
+      <text x="84" y="63" font-family="Arial,sans-serif" font-weight="700" font-size="9" fill="#1E5799" letter-spacing="3">MOBILE DENTAL</text>
+      <text x="84" y="75" font-family="Arial,sans-serif" font-weight="700" font-size="9" fill="#1E5799" letter-spacing="3">CLINICS AUSTRALIA</text>
+    </svg>
+  </a>
+
+  <ul class="nav-links">
+    <li><a href="#services">Services</a></li>
+    <li><a href="#how">How It Works</a></li>
+    <li><a href="#about">About Us</a></li>
+    <li><a href="#cta" class="nav-cta">Contact Us</a></li>
+  </ul>
+</nav>
+
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+
+  <div class="hero-content">
+    <div class="hero-badge">
+      <span class="hb-dot"></span>
+      🇦🇺 100% Australian Owned &amp; Operated
+    </div>
+    <h1 class="hero-title">
+      Your Smile.<br>
+      <em>Our Passion.</em>
+    </h1>
+    <p class="hero-sub">Mobile Dental Clinics Australia provides fully equipped, portable dental services to aged care facilities, schools, early learning centres, and corporate workplaces — delivered directly to you, anywhere in Australia.</p>
+    <div class="hero-actions">
+      <a href="#services" class="btn-primary">Explore Our Services →</a>
+      <a href="#about" class="btn-ghost">Our Story →</a>
+    </div>
+    <div class="hero-phone">
+      <div class="hero-phone-icon">📞</div>
+      <div>
+        <a href="tel:1300765640">1300 765 640</a>
+        <span>Call us for a free consultation</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-visual">
+    <div class="hv-wrap">
+      <div class="hv-card">
+        <div class="hv-label">Our Mobile Services</div>
+        <div class="chips">
+          <div class="chip">👴 Aged Care</div>
+          <div class="chip">🏫 Schools</div>
+          <div class="chip">🧒 Early Learning</div>
+          <div class="chip">🏢 Corporate</div>
+        </div>
+        <div class="hv-stats">
+          <div class="hv-stat"><span class="hv-num">400+</span><div class="hv-lbl">Facilities Served</div></div>
+          <div class="hv-stat"><span class="hv-num">10+</span><div class="hv-lbl">Years Experience</div></div>
+          <div class="hv-stat"><span class="hv-num">AUS</span><div class="hv-lbl">Nationwide</div></div>
+        </div>
+      </div>
+      <div class="fb fb-award">
+        <span class="fb-awd-icon">🏆</span>
+        <div>
+          <div class="fb-awd-title">Award Winner</div>
+          <div class="fb-awd-sub">Small Business Champion 2022</div>
+        </div>
+      </div>
+      <div class="fb fb-ins">
+        <div class="fb-ins-title">✅ All Funds Accepted</div>
+        <div class="fb-ins-sub">Medicare · Private Health · DVA · CDBS</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- PARTNERS -->
+<div id="partners">
+  <p class="p-label">Trusted by leading aged care &amp; healthcare organisations across Australia</p>
+  <div class="mq-wrap">
+    <div class="mq-track">
+      <span class="mq-item">Arcare</span>
+      <span class="mq-item">Royal Freemasons</span>
+      <span class="mq-item">Mecwacare</span>
+      <span class="mq-item">Regis Aged Care</span>
+      <span class="mq-item">400+ Facilities Nationwide</span>
+      <span class="mq-item">Monash Health</span>
+      <span class="mq-item">Victorian DDAS</span>
+      <span class="mq-item">Arcare</span>
+      <span class="mq-item">Royal Freemasons</span>
+      <span class="mq-item">Mecwacare</span>
+      <span class="mq-item">Regis Aged Care</span>
+      <span class="mq-item">400+ Facilities Nationwide</span>
+      <span class="mq-item">Monash Health</span>
+      <span class="mq-item">Victorian DDAS</span>
+    </div>
+  </div>
+</div>
+
+
+<!-- SERVICES -->
+<section id="services">
+  <div class="svc-header reveal">
+    <div>
+      <div class="sec-label">What We Offer</div>
+      <h2 class="sec-title">Premium dental care,<br><em>wherever you need it</em></h2>
+    </div>
+    <p class="svc-desc">Our completely portable equipment can be set up in virtually any space — bedside in aged care, in a school hall, or in a corporate boardroom. We remove barriers to access and bring expert dental care directly to those who need it most.</p>
+  </div>
+  <div class="svc-grid">
+    <div class="svc-card reveal" style="transition-delay:.05s">
+      <div class="svc-icon">👴</div>
+      <h3 class="svc-name">Aged Care</h3>
+      <p class="svc-desc-txt">Affordable and flexible dental treatment delivered in the comfort and convenience of the aged care facility or the patient's own home. Treatment is completed bedside — no need to transport residents.</p>
+      <a href="#" class="svc-link">Learn More →</a>
+    </div>
+    <div class="svc-card reveal" style="transition-delay:.1s">
+      <div class="svc-icon">🏫</div>
+      <h3 class="svc-name">Schools</h3>
+      <p class="svc-desc-txt">All our equipment is completely portable and can be set up in your school's sports hall, canteen, assembly hall or any suitable space. We work around the school day to minimise disruption to learning.</p>
+      <a href="#" class="svc-link">Learn More →</a>
+    </div>
+    <div class="svc-card reveal" style="transition-delay:.15s">
+      <div class="svc-icon">🧒</div>
+      <h3 class="svc-name">Early Learning Centres</h3>
+      <p class="svc-desc-txt">Our friendly and gentle staff are skilled in children's dentistry and will have your young ones skipping into the chair. We make dental visits a fun, positive experience for every child.</p>
+      <a href="#" class="svc-link">Learn More →</a>
+    </div>
+    <div class="svc-card wide hl reveal" style="transition-delay:.2s">
+      <div>
+        <div class="svc-icon">🦷</div>
+        <h3 class="svc-name">Dentures for Aged Care</h3>
+        <p class="svc-desc-txt">Affordable and flexible denture treatment delivered in the comfort of the aged care facility. All treatment is completed bedside — no need to transport patients. Our dental prosthetist works directly with residents and staff.</p>
+        <a href="#" class="svc-link">Learn More →</a>
+      </div>
+      <div class="fund-box">
+        <div class="fund-label">Accepted Payment &amp; Funds</div>
+        <div class="fund-list">
+          <div><span>✓</span>All Private Health Insurance Funds</div>
+          <div><span>✓</span>Medicare / CDBS</div>
+          <div><span>✓</span>Department of Veterans' Affairs (DVA)</div>
+          <div><span>✓</span>Privately Billed Patients</div>
+        </div>
+      </div>
+    </div>
+    <div class="svc-card reveal" style="transition-delay:.25s">
+      <div class="svc-icon">🏢</div>
+      <h3 class="svc-name">Corporate</h3>
+      <p class="svc-desc-txt">Avoid costly downtime from staff taking leave to visit the dentist. We set up directly in your office or workplace — your team receives professional dental care without ever leaving work.</p>
+      <a href="#" class="svc-link">Learn More →</a>
+    </div>
+  </div>
+</section>
+
+
+<!-- HOW IT WORKS -->
+<section id="how">
+  <div class="how-hdr reveal">
+    <div class="sec-label">Simple Process</div>
+    <h2 class="sec-title">How it <em>works</em></h2>
+    <p>Getting mobile dental care organised for your facility or workplace is straightforward. We handle everything from initial consultation to follow-up care.</p>
+  </div>
+  <div class="how-steps">
+    <div class="how-line"></div>
+    <div class="how-step reveal" style="transition-delay:.05s">
+      <div class="how-num">01</div>
+      <h3 class="how-step-title">Get in Touch</h3>
+      <p class="how-step-desc">Call 1300 765 640 or email us. We'll discuss your facility's specific needs, patient demographics, and requirements.</p>
+    </div>
+    <div class="how-step reveal" style="transition-delay:.15s">
+      <div class="how-num">02</div>
+      <h3 class="how-step-title">Schedule a Visit</h3>
+      <p class="how-step-desc">We coordinate a convenient date and time that fits around your facility's schedule and minimises disruption to operations.</p>
+    </div>
+    <div class="how-step reveal" style="transition-delay:.25s">
+      <div class="how-num">03</div>
+      <h3 class="how-step-title">We Arrive &amp; Set Up</h3>
+      <p class="how-step-desc">Our team arrives with a fully equipped, portable dental clinic and sets up quickly in any available space within your facility.</p>
+    </div>
+    <div class="how-step reveal" style="transition-delay:.35s">
+      <div class="how-num">04</div>
+      <h3 class="how-step-title">Treat &amp; Follow Up</h3>
+      <p class="how-step-desc">We provide complete dental care and handle all insurance billing, health fund claims, and clinical records on your behalf.</p>
+    </div>
+  </div>
+</section>
+
+
+<!-- STATS -->
+<div id="stats">
+  <div class="stats-row">
+    <div class="reveal"><span class="stat-num">400+</span><div class="stat-lbl">Facilities served<br>nationwide</div></div>
+    <div class="reveal" style="transition-delay:.12s"><span class="stat-num">10+</span><div class="stat-lbl">Years of mobile<br>dental experience</div></div>
+    <div class="reveal" style="transition-delay:.24s"><span class="stat-num">2015</span><div class="stat-lbl">Founded — on a mission<br>to help all Australians</div></div>
+    <div class="reveal" style="transition-delay:.36s"><span class="stat-num">100%</span><div class="stat-lbl">Australian owned<br>family business</div></div>
+  </div>
+</div>
+
+
+<!-- AWARD -->
+<div id="award">
+  <div class="award-card reveal">
+    <div class="award-icon">🏆</div>
+    <div>
+      <h3 class="award-title">Australian Small Business Champion 2022</h3>
+      <p class="award-desc">Mobile Dental Clinics Australia was proudly recognised as an Australian Small Business Champion Award Winner in 2022. This prestigious award recognises our commitment to innovation in healthcare accessibility and our dedication to improving dental outcomes for all Australians — regardless of their mobility, age, or location.</p>
+    </div>
+  </div>
+</div>
+
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="about-wrap">
+    <div class="about-visual reveal">
+      <div class="about-img">
+        <svg width="140" height="170" viewBox="0 0 80 100" opacity="0.22">
+          <path d="M10 22C10 12 16.5 6 25 6C29.5 6 33 8 36 10.5C37.8 12 39.2 13 40 13C40.8 13 42.2 12 44 10.5C47 8 50.5 6 55 6C63.5 6 70 12 70 22C70 31 66 41 62 52C58.5 61 56.5 72 54.5 82C53.5 87 50.5 89.5 47.5 87C45.5 85 44.5 79 43.5 72C42.5 65 41.5 60 40 60C38.5 60 37.5 65 36.5 72C35.5 79 34.5 85 32.5 87C29.5 89.5 26.5 87 25.5 82C23.5 72 21.5 61 18 52C14 41 10 31 10 22Z" fill="#1E5799"/>
+          <path d="M20 22C20 15 25 10 32 10C36 10 39 12 41 14C39 12 36 10 32 10C25 10 20 15 20 22ZM20 22C20 15 25 10 32 10C36 10 39 12 40 14C41 12 44 10 48 10C55 10 60 15 60 22C60 30 56.5 40 53 50C50 59 48.5 70 46.5 80C46 83 44.8 84 43.5 83.5C42.5 83 42 78 41 71C40 63 39.5 58.5 40 58.5C40.5 58.5 40 63 39 71C38 78 37.5 83 36.5 83.5C35.2 84 34 83 33.5 80C31.5 70 30 59 27 50C23.5 40 20 30 20 22Z" fill="#2B8FD0"/>
+          <path d="M29 19C29 14.5 31.5 12 35.5 12.5C37 12.8 38.5 14 40 15.5C41.5 14 43 12.8 44.5 12.5C48.5 12 51 14.5 51 19C51 25.5 48.5 33 46.5 41C44.5 49 43.5 58.5 42 67.5C41.7 69.5 41 70.5 40 70.5C39 70.5 38.3 69.5 38 67.5C36.5 58.5 35.5 49 33.5 41C31.5 33 29 25.5 29 19Z" fill="#7EC8E3"/>
+        </svg>
+        <span class="about-img-txt">Bringing dental care to you</span>
+      </div>
+      <div class="about-year">
+        <span class="about-year-num">2015</span>
+        <span class="about-year-lbl">Year Founded</span>
+      </div>
+    </div>
+    <div class="about-text reveal" style="transition-delay:.2s">
+      <div class="sec-label">Our Story</div>
+      <h2 class="sec-title">An Australian family business with a <em>national mission</em></h2>
+      <div class="mission-q">
+        <blockquote>"To provide and improve access to dental services for all Australians, nationwide."</blockquote>
+        <cite>— MDCA Mission Statement</cite>
+      </div>
+      <p>Mobile Dental Clinics Australia (MDCA) is a wholly Australian owned family business providing mobile emergency, general and dental laboratory services throughout Australia.</p>
+      <p>MDCA was founded in 2015 by <strong style="color:#fff">Caitlin Amy Wainrib</strong> (1989–2020), an Oral Health Therapist and Hygienist with extended scope qualifications. Her career spanned over 10 years in private practices across Australia and the United Kingdom, as well as with Monash Health.</p>
+      <p>During her time with the Victorian Domiciliary Dental Service, Caitlin developed a passion for meeting the needs of those less able to access traditional dental clinics. Starting with a single mobile unit and van — while continuing to lecture at Melbourne and LaTrobe Universities — she built MDCA into the nationwide fleet it is today.</p>
+    </div>
+  </div>
+
+  <div class="team-hdr reveal">
+    <div class="sec-label">The Team</div>
+    <h3 class="sec-title" style="margin-bottom:0">The people <em>behind the clinic</em></h3>
+  </div>
+  <div class="team-grid">
+    <div class="team-card reveal" style="transition-delay:.04s"><div class="team-avatar">👨‍💼</div><div class="team-name">Glenn Wainrib</div><div class="team-role">Director</div></div>
+    <div class="team-card reveal" style="transition-delay:.08s"><div class="team-avatar">👨‍💼</div><div class="team-name">Stephen Wainrib</div><div class="team-role">General Manager</div></div>
+    <div class="team-card reveal" style="transition-delay:.12s"><div class="team-avatar">👩‍⚕️</div><div class="team-name">Rachael Starr</div><div class="team-role">National Clinical Coordinator</div></div>
+    <div class="team-card reveal" style="transition-delay:.16s"><div class="team-avatar">🦷</div><div class="team-name">Dr. Mohammed Hossain</div><div class="team-role">Principal Dentist</div></div>
+    <div class="team-card reveal" style="transition-delay:.20s"><div class="team-avatar">👩‍💼</div><div class="team-name">Stephanie Anastasopoulos</div><div class="team-role">Dental Patient Coordinator Team Lead</div></div>
+    <div class="team-card reveal" style="transition-delay:.24s"><div class="team-avatar">🤝</div><div class="team-name">Natasha D'Souza</div><div class="team-role">Client Relationship Manager</div></div>
+    <div class="team-card reveal" style="transition-delay:.28s"><div class="team-avatar">🦷</div><div class="team-name">Charlene Malecaut</div><div class="team-role">Dental Prosthetics Team Lead</div></div>
+    <div class="team-card reveal" style="transition-delay:.32s"><div class="team-avatar">📊</div><div class="team-name">Alex Pogoriller</div><div class="team-role">Head of Finance</div></div>
+  </div>
+</section>
+
+
+<!-- CTA -->
+<section id="cta">
+  <div class="cta-inner">
+    <div class="sec-label reveal">Ready to Partner?</div>
+    <h2 class="sec-title reveal">Bring dental care<br><em>to your facility today</em></h2>
+    <p class="reveal">Contact us to discuss how MDCA can serve your organisation. Our team is ready to create a tailored mobile dental solution — no obligation, completely flexible.</p>
+    <div class="cta-btns reveal">
+      <a href="mailto:info@mobiledentist.com.au" class="btn-primary">✉ Email Us</a>
+      <a href="#" class="btn-ghost">Learn About Franchising →</a>
+    </div>
+    <a href="tel:1300765640" class="cta-phone reveal">1300 765 640</a>
+    <p class="cta-addr reveal">G06, 12 Corporate Drive, Heatherton VIC 3202 &nbsp;·&nbsp; info@mobiledentist.com.au</p>
+  </div>
+</section>
+
+
+<!-- FOOTER -->
+<footer>
+  <div class="ft-grid">
+    <div>
+      <svg height="44" viewBox="0 0 270 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M10 22C10 12 16.5 6 25 6C29.5 6 33 8 36 10.5C37.8 12 39.2 13 40 13C40.8 13 42.2 12 44 10.5C47 8 50.5 6 55 6C63.5 6 70 12 70 22C70 31 66 41 62 52C58.5 61 56.5 72 54.5 82C53.5 87 50.5 89.5 47.5 87C45.5 85 44.5 79 43.5 72C42.5 65 41.5 60 40 60C38.5 60 37.5 65 36.5 72C35.5 79 34.5 85 32.5 87C29.5 89.5 26.5 87 25.5 82C23.5 72 21.5 61 18 52C14 41 10 31 10 22Z" fill="#1A3A6B"/>
+        <path d="M16 22C16 14 21 9 28 9C32.5 9 36 11.5 38.5 13.5C39.3 14.2 39.7 14.7 40 14.7C40.3 14.7 40.7 14.2 41.5 13.5C44 11.5 47.5 9 52 9C59 9 64 14 64 22C64 30 60.5 40 57 50.5C54 59.5 52 70 50 80C49.5 83 48 84 46 83C44.5 82 44 77 43 71C42 64 41 59 40 59C39 59 38 64 37 71C36 77 35.5 82 34 83C32 84 30.5 83 30 80C28 70 26 59.5 23 50.5C19.5 40 16 30 16 22Z" fill="#1E5799"/>
+        <path d="M22 22C22 15 26.5 11 33 11C37 11 40 13.5 40 16C40 13.5 43 11 47 11C53.5 11 58 15 58 22C58 29 55 38 51.5 48C49 57 47.5 67 45.5 77C45 80 44 81.5 43 81C42 80.5 41.5 76 41 70C40 62.5 39.5 58 40 58C40.5 58 40 62.5 39 70C38.5 76 38 80.5 37 81C36 81.5 35 80 34.5 77C32.5 67 31 57 28.5 48C25 38 22 29 22 22Z" fill="#2B8FD0"/>
+        <path d="M29 19C29 14.5 31.5 12 35.5 12.5C37 12.8 38.5 14 40 15.5C41.5 14 43 12.8 44.5 12.5C48.5 12 51 14.5 51 19C51 25.5 48.5 33 46.5 41C44.5 49 43.5 58.5 42 67.5C41.7 69.5 41 70.5 40 70.5C39 70.5 38.3 69.5 38 67.5C36.5 58.5 35.5 49 33.5 41C31.5 33 29 25.5 29 19Z" fill="#7EC8E3" opacity="0.75"/>
+        <text x="84" y="43" font-family="'Arial Black',Arial,sans-serif" font-weight="900" font-size="30" fill="#4FA8D8" letter-spacing="1.5">MDCA</text>
+        <line x1="84" y1="50" x2="206" y2="50" stroke="#2B8FD0" stroke-width="1" opacity="0.5"/>
+        <text x="84" y="63" font-family="Arial,sans-serif" font-weight="700" font-size="9" fill="#7EC8E3" letter-spacing="3">MOBILE DENTAL</text>
+        <text x="84" y="75" font-family="Arial,sans-serif" font-weight="700" font-size="9" fill="#7EC8E3" letter-spacing="3">CLINICS AUSTRALIA</text>
+      </svg>
+      <p class="ft-desc">A wholly Australian owned family business providing mobile emergency, general and dental laboratory services throughout Australia since 2015.</p>
+    </div>
+    <div>
+      <div class="ft-col-title">Services</div>
+      <ul class="ft-links">
+        <li><a href="#">Aged Care</a></li>
+        <li><a href="#">Schools</a></li>
+        <li><a href="#">Early Learning Centres</a></li>
+        <li><a href="#">Corporate</a></li>
+        <li><a href="#">Dentures</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="ft-col-title">Company</div>
+      <ul class="ft-links">
+        <li><a href="#">About Us</a></li>
+        <li><a href="#">Franchising</a></li>
+        <li><a href="#">Contact Us</a></li>
+        <li><a href="#">Privacy Policy</a></li>
+        <li><a href="#">Complaints Policy</a></li>
+        <li><a href="#">Terms &amp; Conditions</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="ft-col-title">Get In Touch</div>
+      <div class="ft-contact">📞 <a href="tel:1300765640">1300 765 640</a></div>
+      <div class="ft-contact">✉ <a href="mailto:info@mobiledentist.com.au">info@mobiledentist.com.au</a></div>
+      <div class="ft-contact">📍 G06, 12 Corporate Drive<br>Heatherton VIC 3202</div>
+    </div>
+  </div>
+  <div class="ft-bottom">
+    <span class="ft-copy">© 2024 Mobile Dental Clinics Australia. All rights reserved.</span>
+    <div class="ft-legal">
+      <a href="#">Privacy Policy</a>
+      <a href="#">Complaints Policy &amp; Procedure</a>
+      <a href="#">Terms &amp; Conditions</a>
+    </div>
+  </div>
+</footer>
+
+
+<script>
+  // Smooth cursor
+  const dot=document.getElementById('dot'),ring=document.getElementById('ring');
+  let mx=0,my=0,rx=0,ry=0;
+  document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY});
+  (function tick(){dot.style.left=mx+'px';dot.style.top=my+'px';rx+=(mx-rx)*.12;ry+=(my-ry)*.12;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(tick)})();
+
+  // Progress bar
+  const pbar=document.getElementById('pbar');
+  window.addEventListener('scroll',()=>{pbar.style.width=(window.scrollY/(document.body.scrollHeight-window.innerHeight)*100)+'%'},{passive:true});
+
+  // Nav
+  const nav=document.getElementById('nav');
+  window.addEventListener('scroll',()=>nav.classList.toggle('scrolled',window.scrollY>60),{passive:true});
+
+  // Reveal
+  const obs=new IntersectionObserver(es=>es.forEach(e=>e.isIntersecting&&e.target.classList.add('visible')),{threshold:.1});
+  document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+</script>
+</body>
+</html>
